@@ -3,3 +3,6 @@
 
 -- Load data from CSV files into tables
 .read load_schema_rw.sql
+
+-- Mart - Create flat mart
+.read create_flat_mart.sql
