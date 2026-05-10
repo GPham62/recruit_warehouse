@@ -10,3 +10,9 @@
 
 -- Mart - Create skills demand mart
 .read create_skills_mart.sql
+
+-- Mart - Create priority mart
+.read create_priority_mart.sql
+
+-- Mart - Update priority mart
+.read update_priority_mart.sql
