@@ -1,0 +1,118 @@
+table fact_company_hiring_monthly
+	lineageTag: ce61c7c7-78e1-471a-a4f1-9edc45c3946b
+
+	/// Total postings from company hiring fact
+	measure 'Total Company Postings' = SUMX(fact_company_hiring_monthly, VALUE(fact_company_hiring_monthly[postings_count]))
+		formatString: #,##0
+		displayFolder: Company Metrics
+		lineageTag: 15c3cff0-9a68-43fc-862d-ca418e34fef8
+
+	/// Postings in United States only
+	measure 'US Postings' = CALCULATE([Total Company Postings], fact_company_hiring_monthly[job_country] = "United States")
+		formatString: #,##0
+		displayFolder: Geography
+		lineageTag: 2b2c522d-a914-45f1-8e41-bf99a7548c06
+
+	/// US postings as % of global total
+	measure 'US Share of Global' = DIVIDE([US Postings], [Total Company Postings], 0)
+		formatString: 0.0%
+		displayFolder: Geography
+		lineageTag: 140f7d14-929d-4115-92e2-28b876c389f0
+
+	column company_id
+		dataType: string
+		lineageTag: 79fba22d-7134-4328-8166-f6e706541100
+		summarizeBy: none
+		sourceColumn: company_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_title_short_id
+		dataType: string
+		lineageTag: adc903d3-5901-4b24-a1e0-1958500cb132
+		summarizeBy: none
+		sourceColumn: job_title_short_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_start_date
+		dataType: string
+		lineageTag: 33c6f9d5-8aeb-442f-b3f0-f3da59ec883a
+		summarizeBy: none
+		sourceColumn: month_start_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_country
+		dataType: string
+		lineageTag: 3f44ff70-1407-4eea-953b-3fef3b795474
+		summarizeBy: none
+		sourceColumn: job_country
+
+		annotation SummarizationSetBy = Automatic
+
+	column postings_count
+		dataType: string
+		lineageTag: a7d58174-59b9-4ba2-a82c-b6c0a24faffd
+		summarizeBy: none
+		sourceColumn: postings_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column median_salary_year
+		dataType: string
+		lineageTag: d080ecd1-4fe2-4ceb-83ac-a63ec92f9572
+		summarizeBy: none
+		sourceColumn: median_salary_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column min_salary_year
+		dataType: string
+		lineageTag: deda0669-52de-45bb-8dec-8673b4e666c9
+		summarizeBy: none
+		sourceColumn: min_salary_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column max_salary_year
+		dataType: string
+		lineageTag: ac5b0b8a-72b2-414b-b05b-32d5279a780f
+		summarizeBy: none
+		sourceColumn: max_salary_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column remote_share
+		dataType: string
+		lineageTag: 0031ecec-96ed-42b4-b023-166c14153fd7
+		summarizeBy: none
+		sourceColumn: remote_share
+
+		annotation SummarizationSetBy = Automatic
+
+	column health_insurance_share
+		dataType: string
+		lineageTag: 1872c90b-b2f4-4832-ad43-4baa0ba04b8f
+		summarizeBy: none
+		sourceColumn: health_insurance_share
+
+		annotation SummarizationSetBy = Automatic
+
+	column no_degree_mention_share
+		dataType: string
+		lineageTag: 62f92b5c-68c8-46f6-ab59-b08ffaed4cd3
+		summarizeBy: none
+		sourceColumn: no_degree_mention_share
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_company_hiring_monthly = m
+		mode: import
+		source =
+				let
+				    Source = Python.Execute("import duckdb#(lf)import pandas as pd#(lf)import os#(lf)#(lf)con = duckdb.connect(""md:?motherduck_token="" + os.environ[""MOTHERDUCK_TOKEN""])#(lf)#(lf)priority_roles = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_roles"").df()#(lf)#(lf)priority_jobs_snapshot = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_jobs_snapshot"").df()#(lf)#(lf)job_postings_fact = con.execute(""SELECT * FROM rw_marts.job_postings_fact"").df()#(lf)#(lf)fact_skill_demand_monthly = con.execute(""SELECT * FROM rw_marts.skills_mart.fact_skill_demand_monthly"").df()#(lf)#(lf)fact_company_hiring_monthly = con.execute(""SELECT * FROM rw_marts.company_mart.fact_company_hiring_monthly"").df()"),
+				    fact_company_hiring_monthly1 = Source{[Name="fact_company_hiring_monthly"]}[Value]
+				in
+				    fact_company_hiring_monthly1
+

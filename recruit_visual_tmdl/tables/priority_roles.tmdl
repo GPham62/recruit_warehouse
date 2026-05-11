@@ -1,0 +1,38 @@
+table priority_roles
+	lineageTag: 909b97c0-b881-4ab4-a2ae-996bac380e95
+
+	column role_id
+		dataType: string
+		lineageTag: b97defa1-90df-4d8c-982b-a835b502928b
+		summarizeBy: none
+		sourceColumn: role_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column role_name
+		dataType: string
+		lineageTag: d0b1be4a-cc05-43b4-b173-f415c6a08e10
+		summarizeBy: none
+		sourceColumn: role_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column priority_lvl
+		dataType: string
+		lineageTag: 63859630-d805-495b-b3ea-d8f27946fdb4
+		summarizeBy: none
+		sourceColumn: priority_lvl
+
+		annotation SummarizationSetBy = Automatic
+
+	partition priority_roles = m
+		mode: import
+		source =
+				let
+				    Source = Python.Execute("import duckdb#(lf)import pandas as pd#(lf)import os#(lf)#(lf)con = duckdb.connect(""md:?motherduck_token="" + os.environ[""MOTHERDUCK_TOKEN""])#(lf)#(lf)priority_roles = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_roles"").df()#(lf)#(lf)priority_jobs_snapshot = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_jobs_snapshot"").df()#(lf)#(lf)job_postings_fact = con.execute(""SELECT * FROM rw_marts.job_postings_fact"").df()#(lf)#(lf)fact_skill_demand_monthly = con.execute(""SELECT * FROM rw_marts.skills_mart.fact_skill_demand_monthly"").df()#(lf)#(lf)fact_company_hiring_monthly = con.execute(""SELECT * FROM rw_marts.company_mart.fact_company_hiring_monthly"").df()"),
+				    priority_roles1 = Source{[Name="priority_roles"]}[Value]
+				in
+				    priority_roles1
+
+	changedProperty = Name
+

@@ -1,0 +1,24 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["fact_skill_demand_monthly","fact_company_hiring_monthly","job_postings_fact","priority_jobs_snapshot","priority_roles"]
+
+annotation PBI_ProTooling = ["MCP-PBIModeling"]
+
+ref table DateTableTemplate_c97cdf20-b954-4f33-b11c-9cca7b9eadf6
+ref table fact_skill_demand_monthly
+ref table LocalDateTable_f230ebda-91e8-4353-9e92-09db677f7b69
+ref table fact_company_hiring_monthly
+ref table job_postings_fact
+ref table priority_jobs_snapshot
+ref table priority_roles
+
+ref cultureInfo en-US
+

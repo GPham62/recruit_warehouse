@@ -1,0 +1,152 @@
+table job_postings_fact
+	lineageTag: 06e7472e-0a7b-4f65-bda4-875592dc75a3
+
+	/// Total unique job postings in the fact table
+	measure 'Total Unique Jobs' = COUNTROWS(job_postings_fact)
+		formatString: #,##0
+		displayFolder: Job Market
+		lineageTag: 10e242f0-27dc-47ba-8b20-ed8b4f7a05b1
+
+	/// Number of unique countries with job postings
+	measure 'Countries Hiring' = DISTINCTCOUNT(job_postings_fact[job_country])
+		formatString: #,##0
+		displayFolder: Job Market
+		lineageTag: 9bca0eeb-a94e-4c40-ae07-0f80deb3d129
+
+	column job_id
+		dataType: string
+		lineageTag: 7d1e0abf-0a72-4a47-a3d5-fe9dc640eca8
+		summarizeBy: none
+		sourceColumn: job_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column company_id
+		dataType: string
+		lineageTag: 3ee584c8-a2b4-4bf9-8f7f-306cdbe96355
+		summarizeBy: none
+		sourceColumn: company_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_title_short
+		dataType: string
+		lineageTag: 811772e1-2020-438d-aa7e-2e80831a86d6
+		summarizeBy: none
+		sourceColumn: job_title_short
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_title
+		dataType: string
+		lineageTag: ff7ffe81-3b0a-49a3-9fe3-2b62367c38e1
+		summarizeBy: none
+		sourceColumn: job_title
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_location
+		dataType: string
+		lineageTag: 10890ba1-d40c-42de-95e0-d11b53f8e253
+		summarizeBy: none
+		sourceColumn: job_location
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_via
+		dataType: string
+		lineageTag: 195365cc-34b8-48c5-8fad-aa7794e9aafe
+		summarizeBy: none
+		sourceColumn: job_via
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_schedule_type
+		dataType: string
+		lineageTag: 284aca94-bd2f-4546-abd4-1b949be08331
+		summarizeBy: none
+		sourceColumn: job_schedule_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_work_from_home
+		dataType: string
+		lineageTag: b2eb68ba-c7a4-411b-b7db-e3a08568d326
+		summarizeBy: none
+		sourceColumn: job_work_from_home
+
+		annotation SummarizationSetBy = Automatic
+
+	column search_location
+		dataType: string
+		lineageTag: 0f6b2549-a3b7-4d31-bd81-f55607c899c7
+		summarizeBy: none
+		sourceColumn: search_location
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_posted_date
+		dataType: string
+		lineageTag: 9b4857e6-a08b-4978-8c94-2d7e60b6d01c
+		summarizeBy: none
+		sourceColumn: job_posted_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_no_degree_mention
+		dataType: string
+		lineageTag: db0a38ca-52bc-4129-8175-72f1110499b2
+		summarizeBy: none
+		sourceColumn: job_no_degree_mention
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_health_insurance
+		dataType: string
+		lineageTag: aaa13b05-9df3-41ce-bf6a-5176c8c34754
+		summarizeBy: none
+		sourceColumn: job_health_insurance
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_country
+		dataType: string
+		lineageTag: 799ac1fe-1daa-4135-aa6c-9c845fdc783c
+		summarizeBy: none
+		sourceColumn: job_country
+
+		annotation SummarizationSetBy = Automatic
+
+	column salary_rate
+		dataType: string
+		lineageTag: ee469aad-b220-4a76-a568-51816d61fa25
+		summarizeBy: none
+		sourceColumn: salary_rate
+
+		annotation SummarizationSetBy = Automatic
+
+	column salary_year_avg
+		dataType: string
+		lineageTag: 04132465-efcc-42b4-a265-7f04d4e9c594
+		summarizeBy: none
+		sourceColumn: salary_year_avg
+
+		annotation SummarizationSetBy = Automatic
+
+	column salary_hour_avg
+		dataType: string
+		lineageTag: 56fb035b-a55f-4c45-a1dd-1159b8bf7e1e
+		summarizeBy: none
+		sourceColumn: salary_hour_avg
+
+		annotation SummarizationSetBy = Automatic
+
+	partition job_postings_fact = m
+		mode: import
+		source =
+				let
+				    Source = Python.Execute("import duckdb#(lf)import pandas as pd#(lf)import os#(lf)#(lf)con = duckdb.connect(""md:?motherduck_token="" + os.environ[""MOTHERDUCK_TOKEN""])#(lf)#(lf)priority_roles = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_roles"").df()#(lf)#(lf)priority_jobs_snapshot = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_jobs_snapshot"").df()#(lf)#(lf)job_postings_fact = con.execute(""SELECT * FROM rw_marts.job_postings_fact"").df()#(lf)#(lf)fact_skill_demand_monthly = con.execute(""SELECT * FROM rw_marts.skills_mart.fact_skill_demand_monthly"").df()#(lf)#(lf)fact_company_hiring_monthly = con.execute(""SELECT * FROM rw_marts.company_mart.fact_company_hiring_monthly"").df()"),
+				    job_postings_fact1 = Source{[Name="job_postings_fact"]}[Value]
+				in
+				    job_postings_fact1
+

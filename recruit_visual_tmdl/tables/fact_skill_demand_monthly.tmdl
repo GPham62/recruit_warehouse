@@ -1,0 +1,208 @@
+table fact_skill_demand_monthly
+	lineageTag: 89ffd297-26e4-4465-93a0-2e4b5da58054
+
+	/// Total job postings across all roles and months
+	measure 'Total Job Postings' = SUM(fact_skill_demand_monthly[postings_count])
+		formatString: #,##0
+		displayFolder: Core Metrics
+		lineageTag: 525869d7-30be-4de6-bde3-44cac0af8d49
+
+	/// Total remote job postings
+	measure 'Remote Postings' = SUM(fact_skill_demand_monthly[remote_postings_count])
+		formatString: #,##0
+		displayFolder: Core Metrics
+		lineageTag: 508c67e1-3604-4ca4-a071-2170e3ae1058
+
+	/// Jobs that do not require a degree
+	measure 'No Degree Postings' = SUM(fact_skill_demand_monthly[no_degree_postings_count])
+		formatString: #,##0
+		displayFolder: Core Metrics
+		lineageTag: 1fa7d0a6-de80-408f-949c-fbd79b6adffe
+
+	/// Share of postings that are remote
+	measure 'Remote % of Total' = DIVIDE([Remote Postings], [Total Job Postings], 0)
+		formatString: 0.0%
+		displayFolder: Core Metrics
+		lineageTag: 14de3ca4-1607-49a9-a84d-ae4903271db3
+
+	/// Share of postings with no degree requirement
+	measure 'No Degree %' = DIVIDE([No Degree Postings], [Total Job Postings], 0)
+		formatString: 0.0%
+		displayFolder: Core Metrics
+		lineageTag: 628f4d4d-f02e-4597-b959-7a9a34f5729c
+
+	/// Month-over-month change in total postings — time intelligence measure
+	measure 'Postings MoM Change' =
+			VAR CurrentMonth = [Total Job Postings]
+			VAR PrevMonth = CALCULATE([Total Job Postings], DATEADD(fact_skill_demand_monthly[month_start_date], -1, MONTH))
+			RETURN DIVIDE(CurrentMonth - PrevMonth, PrevMonth, BLANK())
+		formatString: 0.0%
+		displayFolder: Time Intelligence
+		lineageTag: 343168fc-66bf-4338-8bb4-9f16ff97a4ad
+
+	/// 3-month rolling average of job postings
+	measure 'Postings 3M Rolling Avg' =
+			CALCULATE(
+			    AVERAGEX(
+			        DATESINPERIOD(fact_skill_demand_monthly[month_start_date], LASTDATE(fact_skill_demand_monthly[month_start_date]), -3, MONTH),
+			        [Total Job Postings]
+			    )
+			)
+		formatString: #,##0
+		displayFolder: Time Intelligence
+		lineageTag: 6a04a0bf-6063-4d36-b0ac-2ee1101b86c5
+
+	/// Year-to-date total postings
+	measure 'Postings YTD' = TOTALYTD([Total Job Postings], fact_skill_demand_monthly[month_start_date])
+		formatString: #,##0
+		displayFolder: Time Intelligence
+		lineageTag: aebfdd56-5d7b-43a9-a91d-d3d005ad1e0b
+
+	/// Year-over-year change in postings using SAMEPERIODLASTYEAR
+	measure 'Postings YoY Change' =
+			VAR CY = [Total Job Postings]
+			VAR PY = CALCULATE([Total Job Postings], SAMEPERIODLASTYEAR(fact_skill_demand_monthly[month_start_date]))
+			RETURN DIVIDE(CY - PY, PY, BLANK())
+		formatString: 0.0%
+		displayFolder: Time Intelligence
+		lineageTag: 404dc359-56e2-4fea-ba10-d6c0bcc3a3fa
+
+	/// MoM change in remote share as a percentage point delta
+	measure 'Remote % Trend MoM' =
+			VAR Cur = [Remote % of Total]
+			VAR Prev = CALCULATE([Remote % of Total], DATEADD(fact_skill_demand_monthly[month_start_date], -1, MONTH))
+			RETURN Cur - Prev
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Time Intelligence
+		lineageTag: f87ab8bb-a8b9-482a-92ed-40c6eee6aa5a
+
+	/// Highest single-month postings across all time
+	measure 'Peak Month Postings' = MAXX(VALUES(fact_skill_demand_monthly[month_start_date]), [Total Job Postings])
+		formatString: #,##0
+		displayFolder: Time Intelligence
+		lineageTag: 320940a6-9fe9-4ef8-9310-3da26dcdd236
+
+	/// Total postings for Data Engineer only
+	measure 'Data Engineer Postings' = CALCULATE([Total Job Postings], fact_skill_demand_monthly[job_title_short] = "Data Engineer")
+		formatString: #,##0
+		displayFolder: Role Metrics
+		lineageTag: 36b852ae-4f3e-4f38-a261-7bb867c01bb4
+
+	/// Total postings for Data Analyst only
+	measure 'Data Analyst Postings' = CALCULATE([Total Job Postings], fact_skill_demand_monthly[job_title_short] = "Data Analyst")
+		formatString: #,##0
+		displayFolder: Role Metrics
+		lineageTag: e6d9452b-e665-428a-8859-914b1be15e76
+
+	/// Total postings for Data Scientist only
+	measure 'Data Scientist Postings' = CALCULATE([Total Job Postings], fact_skill_demand_monthly[job_title_short] = "Data Scientist")
+		formatString: #,##0
+		displayFolder: Role Metrics
+		lineageTag: b56a8a05-710e-4d8f-91c7-d8bd1dbcf81c
+
+	/// Total postings for Machine Learning Engineer only
+	measure 'ML Engineer Postings' = CALCULATE([Total Job Postings], fact_skill_demand_monthly[job_title_short] = "Machine Learning Engineer")
+		formatString: #,##0
+		displayFolder: Role Metrics
+		lineageTag: e3094bae-e733-4b13-b738-fc9b17a9b184
+
+	/// Remote share specifically for Data Engineer
+	measure 'Remote % Data Engineer' = DIVIDE(CALCULATE([Remote Postings], fact_skill_demand_monthly[job_title_short] = "Data Engineer"), CALCULATE([Total Job Postings], fact_skill_demand_monthly[job_title_short] = "Data Engineer"), 0)
+		formatString: 0.0%
+		displayFolder: Role Metrics
+		lineageTag: b9ca7c85-0d20-43a6-a09a-e2c5b5b2a488
+
+	/// No-degree share for Data Engineer
+	measure 'No Degree % Data Engineer' = DIVIDE(CALCULATE([No Degree Postings], fact_skill_demand_monthly[job_title_short] = "Data Engineer"), CALCULATE([Total Job Postings], fact_skill_demand_monthly[job_title_short] = "Data Engineer"), 0)
+		formatString: 0.0%
+		displayFolder: Role Metrics
+		lineageTag: 819f5747-11c3-4c53-b606-8fd111c826e0
+
+	/// Current month postings vs peak month — shows recovery strength
+	measure 'Market Recovery Index' =
+			VAR PeakPostings = CALCULATE(MAXX(VALUES(fact_skill_demand_monthly[month_start_date]), [Total Job Postings]), ALL(fact_skill_demand_monthly[month_start_date]))
+			VAR CurPostings = [Total Job Postings]
+			RETURN DIVIDE(CurPostings, PeakPostings, 0)
+		formatString: 0.00
+		displayFolder: Time Intelligence
+		lineageTag: ac6fbdb0-903d-454a-b929-1b2d3f376703
+
+	column skill_id
+		dataType: int64
+		formatString: 0
+		lineageTag: a97c0c12-b051-4608-98ee-2a8e5e9c1eb7
+		summarizeBy: sum
+		sourceColumn: skill_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_start_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 96a75209-4917-4afd-acfe-9d8be90952b2
+		summarizeBy: none
+		sourceColumn: month_start_date
+
+		variation Variation
+			isDefault
+			relationship: af056428-d368-4218-8042-cf7e19e9c07f
+			defaultHierarchy: LocalDateTable_f230ebda-91e8-4353-9e92-09db677f7b69.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column job_title_short
+		dataType: string
+		lineageTag: f7be12d4-e739-417c-87d7-38c7e0221047
+		summarizeBy: none
+		sourceColumn: job_title_short
+
+		annotation SummarizationSetBy = Automatic
+
+	column postings_count
+		dataType: int64
+		formatString: 0
+		lineageTag: b9fd3d55-8d8c-48d8-adfb-d0626296b43d
+		summarizeBy: sum
+		sourceColumn: postings_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column remote_postings_count
+		dataType: int64
+		formatString: 0
+		lineageTag: fce07eaf-c9bf-48a1-8cab-de19862fd935
+		summarizeBy: sum
+		sourceColumn: remote_postings_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column health_insurance_postings_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 075c6a69-3cae-4953-8c0b-763578c94533
+		summarizeBy: sum
+		sourceColumn: health_insurance_postings_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column no_degree_postings_count
+		dataType: int64
+		formatString: 0
+		lineageTag: 2881b224-61c1-470a-97be-2810526e604c
+		summarizeBy: sum
+		sourceColumn: no_degree_postings_count
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_skill_demand_monthly = m
+		mode: import
+		source =
+				let
+				    Source = Python.Execute("import duckdb#(lf)import pandas as pd#(lf)import os#(lf)#(lf)con = duckdb.connect(""md:?motherduck_token="" + os.environ[""MOTHERDUCK_TOKEN""])#(lf)#(lf)priority_roles = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_roles"").df()#(lf)#(lf)priority_jobs_snapshot = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_jobs_snapshot"").df()#(lf)#(lf)job_postings_fact = con.execute(""SELECT * FROM rw_marts.job_postings_fact"").df()#(lf)#(lf)fact_skill_demand_monthly = con.execute(""SELECT * FROM rw_marts.skills_mart.fact_skill_demand_monthly"").df()#(lf)#(lf)fact_company_hiring_monthly = con.execute(""SELECT * FROM rw_marts.company_mart.fact_company_hiring_monthly"").df()"),
+				    fact_skill_demand_monthly1 = Source{[Name="fact_skill_demand_monthly"]}[Value],
+				    #"Changed Type" = Table.TransformColumnTypes(fact_skill_demand_monthly1,{{"skill_id", Int64.Type}, {"month_start_date", type date}, {"job_title_short", type text}, {"postings_count", Int64.Type}, {"remote_postings_count", Int64.Type}, {"health_insurance_postings_count", Int64.Type}, {"no_degree_postings_count", Int64.Type}})
+				in
+				    #"Changed Type"
+

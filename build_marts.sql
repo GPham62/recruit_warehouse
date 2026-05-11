@@ -1,18 +1,21 @@
--- duckdb rw_marts.duckdb -c ".read build_marts.sql"
+-- duckdb md:rw_marts -c ".read build_marts.sql"
 -- Create star schema tables
-.read create_tables_rw.sql
+.read 1_create_tables_rw.sql
 
 -- Load data from CSV files into tables
-.read load_schema_rw.sql
+.read 2_load_schema_rw.sql
 
 -- Mart - Create flat mart
-.read create_flat_mart.sql
+.read 3_create_flat_mart.sql
 
 -- Mart - Create skills demand mart
-.read create_skills_mart.sql
+.read 4_create_skills_mart.sql
 
 -- Mart - Create priority mart
-.read create_priority_mart.sql
+.read 5_create_priority_mart.sql
 
 -- Mart - Update priority mart
-.read update_priority_mart.sql
+.read 6_update_priority_mart.sql
+
+-- Mart - Create And Update company mart
+.read 7_create_and_update_company_mart.sql

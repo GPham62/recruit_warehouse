@@ -1,14 +1,14 @@
 -- Mart - Update priority roles mart
 
 SELECT '=== Updating Roles for Priority Mart ===' AS info;
--- Update Data Engineer to Priority 1
-UPDATE priority_mart.priority_roles
-SET priority_lvl = 1
-WHERE role_name = 'Data Engineer';
+-- -- Update Data Engineer to Priority 1
+-- UPDATE priority_mart.priority_roles
+-- SET priority_lvl = 1
+-- WHERE role_name = 'Data Engineer';
 
--- Add Data Scientist as Level 3
-INSERT INTO priority_mart.priority_roles (role_id, role_name, priority_lvl)
-VALUES (4, 'Data Scientist', 3);
+-- -- Add Data Scientist as Level 3
+-- INSERT INTO priority_mart.priority_roles (role_id, role_name, priority_lvl)
+-- VALUES (4, 'Data Scientist', 3);
 
 SELECT * FROM priority_mart.priority_roles;
 

@@ -1,0 +1,15 @@
+relationship af056428-d368-4218-8042-cf7e19e9c07f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: fact_skill_demand_monthly.month_start_date
+	toColumn: LocalDateTable_f230ebda-91e8-4353-9e92-09db677f7b69.Date
+
+relationship AutoDetected_d6042bcf-55bf-4c20-a3d2-ffddb3f56a54
+	fromColumn: priority_jobs_snapshot.priority_lvl
+	toColumn: priority_roles.priority_lvl
+
+relationship AutoDetected_142c9eea-d17c-4ebf-ad0d-6dad2a24a603
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: priority_jobs_snapshot.job_id
+	toColumn: job_postings_fact.job_id
+

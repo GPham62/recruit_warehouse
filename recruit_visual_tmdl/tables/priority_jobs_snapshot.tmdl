@@ -1,0 +1,131 @@
+table priority_jobs_snapshot
+	lineageTag: ab415c29-eea6-4bfd-82ae-4c1c0eb66242
+
+	/// Total number of priority job listings
+	measure 'Total Priority Jobs' = COUNTROWS(priority_jobs_snapshot)
+		formatString: #,##0
+		displayFolder: Priority Metrics
+		lineageTag: 5480ac20-3955-415f-802e-6af39b0d9f67
+
+	/// Count of highest-priority (level 1) jobs
+	measure 'Priority 1 Jobs' = CALCULATE(COUNTROWS(priority_jobs_snapshot), priority_jobs_snapshot[priority_lvl] = "1")
+		formatString: #,##0
+		displayFolder: Priority Metrics
+		lineageTag: fd5ca413-18c4-4dde-8a6f-7ad2bbfa6556
+
+	/// Average annual salary using safe text-to-number conversion
+	measure 'Avg Salary (Priority Jobs)' =
+			AVERAGEX(
+			    FILTER(
+			        priority_jobs_snapshot,
+			        NOT(ISBLANK(priority_jobs_snapshot[salary_year_avg]))
+			            && LEN(TRIM(priority_jobs_snapshot[salary_year_avg])) > 0
+			    ),
+			    IF(
+			        ISERROR(VALUE(priority_jobs_snapshot[salary_year_avg])),
+			        BLANK(),
+			        VALUE(priority_jobs_snapshot[salary_year_avg])
+			    )
+			)
+		formatString: $#,##0
+		displayFolder: Priority Metrics
+		lineageTag: 0646c1f3-a941-4fca-af40-5f95cccbe286
+
+	/// Max salary using safe text-to-number conversion
+	measure 'Max Salary' =
+			MAXX(
+			    FILTER(
+			        priority_jobs_snapshot,
+			        NOT(ISBLANK(priority_jobs_snapshot[salary_year_avg]))
+			            && LEN(TRIM(priority_jobs_snapshot[salary_year_avg])) > 0
+			    ),
+			    IF(
+			        ISERROR(VALUE(priority_jobs_snapshot[salary_year_avg])),
+			        BLANK(),
+			        VALUE(priority_jobs_snapshot[salary_year_avg])
+			    )
+			)
+		formatString: $#,##0
+		displayFolder: Priority Metrics
+		lineageTag: be433f7d-5087-49bb-925d-4719188f2e12
+
+	/// Priority 1 jobs as % of all priority jobs
+	measure 'Priority 1 Share' = DIVIDE([Priority 1 Jobs], [Total Priority Jobs], 0)
+		formatString: 0.0%
+		displayFolder: Priority Metrics
+		lineageTag: a2ecd0a5-ffb3-4fd5-8490-cd611c365883
+
+	/// Difference between selected role salary and overall avg
+	measure 'Salary vs Market Avg' =
+			VAR RoleAvg = [Avg Salary (Priority Jobs)]
+			VAR Overall = CALCULATE([Avg Salary (Priority Jobs)], ALL(priority_jobs_snapshot[job_title_short]))
+			RETURN RoleAvg - Overall
+		formatString: $#,##0
+		displayFolder: Priority Metrics
+		lineageTag: 42a60c84-0336-4bcd-88dd-b57643661a23
+
+	column job_id
+		dataType: string
+		lineageTag: 82f18a0a-4eea-4419-a503-e79ca8757f8a
+		summarizeBy: none
+		sourceColumn: job_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_title_short
+		dataType: string
+		lineageTag: 80221d3f-1d0e-4c34-816e-2fce7905fa59
+		summarizeBy: none
+		sourceColumn: job_title_short
+
+		annotation SummarizationSetBy = Automatic
+
+	column company_name
+		dataType: string
+		lineageTag: b645fb67-03ab-40db-abf9-d7a8c8af7ba7
+		summarizeBy: none
+		sourceColumn: company_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column job_posted_date
+		dataType: string
+		lineageTag: 29d47826-2bae-44bc-a5e2-c1e50fbf9209
+		summarizeBy: none
+		sourceColumn: job_posted_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column salary_year_avg
+		dataType: string
+		lineageTag: a5dee0fd-f78d-486a-9303-ad9ae8312d1d
+		summarizeBy: none
+		sourceColumn: salary_year_avg
+
+		annotation SummarizationSetBy = Automatic
+
+	column priority_lvl
+		dataType: string
+		lineageTag: f7c373bb-89bc-402d-af6a-23d77947fdc1
+		summarizeBy: none
+		sourceColumn: priority_lvl
+
+		annotation SummarizationSetBy = Automatic
+
+	column updated_at
+		dataType: string
+		lineageTag: ba33a61f-05f6-42db-9367-8e5f86c25a1b
+		summarizeBy: none
+		sourceColumn: updated_at
+
+		annotation SummarizationSetBy = Automatic
+
+	partition priority_jobs_snapshot = m
+		mode: import
+		source =
+				let
+				    Source = Python.Execute("import duckdb#(lf)import pandas as pd#(lf)import os#(lf)#(lf)con = duckdb.connect(""md:?motherduck_token="" + os.environ[""MOTHERDUCK_TOKEN""])#(lf)#(lf)priority_roles = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_roles"").df()#(lf)#(lf)priority_jobs_snapshot = con.execute(""SELECT * FROM rw_marts.priority_mart.priority_jobs_snapshot"").df()#(lf)#(lf)job_postings_fact = con.execute(""SELECT * FROM rw_marts.job_postings_fact"").df()#(lf)#(lf)fact_skill_demand_monthly = con.execute(""SELECT * FROM rw_marts.skills_mart.fact_skill_demand_monthly"").df()#(lf)#(lf)fact_company_hiring_monthly = con.execute(""SELECT * FROM rw_marts.company_mart.fact_company_hiring_monthly"").df()"),
+				    priority_jobs_snapshot1 = Source{[Name="priority_jobs_snapshot"]}[Value]
+				in
+				    priority_jobs_snapshot1
+
